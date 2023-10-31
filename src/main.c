@@ -115,15 +115,12 @@ static int mount_sd_card(void)
 int main(void)
 {
 	int ret = 0;
-	//if (IS_ENABLED(CONFIG_TEST_SPI_WRITE) || IS_ENABLED(CONFIG_TEST_SPI_READ)) {
-	if (1) {
-		/** SD card mount test **/
-		if (mount_sd_card()) {
-			printk("Failed to mount SD card\n");
-			return -1;
-		} else {
-			printk("Successfully mounted SD card\n");
-		}
+	/** SD card mount test **/
+	if (mount_sd_card()) {
+		printk("Failed to mount SD card\n");
+		return -1;
+	} else {
+		printk("Successfully mounted SD card\n");
 	}
 
 	char file_data_buffer[200];
@@ -131,48 +128,19 @@ int main(void)
 	fs_file_t_init(&data_filp);
 
 	char file_ch;
-	//if (IS_ENABLED(CONFIG_NEXTILES_TEST_SPI_WRITE)) {
-	if (1) {
-		ret = fs_unlink("/SD:/test_data.txt");
+	ret = fs_unlink("/SD:/test_data.txt");
 
-		ret = fs_open(&data_filp, "/SD:/test_data.txt", FS_O_WRITE | FS_O_CREATE);
-		if (ret) {
-			printk("%s -- failed to create file (err = %d)\n", __func__, ret);
-			return -2;
-		} else {
-			printk("%s - successfully created file\n", __func__);
-		}
-
-		sprintf(file_data_buffer, "hello world!\n");
-		ret = fs_write(&data_filp, file_data_buffer, strlen(file_data_buffer));
-		fs_close(&data_filp);
+	ret = fs_open(&data_filp, "/SD:/test_data.txt", FS_O_WRITE | FS_O_CREATE);
+	if (ret) {
+		printk("%s -- failed to create file (err = %d)\n", __func__, ret);
+		return -2;
+	} else {
+		printk("%s - successfully created file\n", __func__);
 	}
 
-	if (IS_ENABLED(CONFIG_TEST_SPI_READ)) {
-		ret = fs_open(&data_filp, "/SD:/test_data.txt", FS_O_READ);
-		if (ret) {
-			printk("%s -- failed to open file for read\n", __func__);
-			return -1;
-		}
-
-		memset(file_data_buffer, 0, sizeof(file_data_buffer));
-		int file_data_buffer_ind = 0;
-		while (1) {
-			ret = fs_read(&data_filp, &file_ch, 1);
-			if (ret <= 0) {
-				printk("%s -- failed to read file (EOF?)\n", __func__);
-				break;
-			}
-			file_data_buffer[file_data_buffer_ind] = file_ch;
-			file_data_buffer_ind++;
-			if (file_ch == '\n') {
-				file_data_buffer_ind = 0;
-				printk("line = %s\n", file_data_buffer);
-			}
-			k_msleep(1);
-		}
-		fs_close(&data_filp);
-	}
+	sprintf(file_data_buffer, "hello world!\n");
+	ret = fs_write(&data_filp, file_data_buffer, strlen(file_data_buffer));
+	fs_close(&data_filp);
 
 	while (1) {
 		k_sleep(K_MSEC(1));
